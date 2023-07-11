@@ -10,15 +10,13 @@ export function Add() {
 
   const formik = useFormik({
     initialValues: {
-      employee: {
         firstName: "",
         lastName: "",
         phone: "",
-      },
     },
     onSubmit: (values) => {
       axios
-        .post(URI, values.employee)
+        .post(URI, values)
         .then((response) => {
           alert("Successfully added employee!");
           navigate("/");
@@ -47,31 +45,31 @@ export function Add() {
       <div style={{ width: "200px", alignSelf: "center" }}>
         <form onSubmit={formik.handleSubmit}>
           <input
-            id="employee.firstName"
-            name="employee.firstName"
+            id="firstName"
+            name="firstName"
             type="text"
             className="form-control mb-4"
             placeholder="First name"
             onChange={formik.handleChange}
-            value={formik.values.employee.firstName}
+            value={formik.values.firstName}
           ></input>
           <input
-            id="employee.lastName"
-            name="employee.lastName"
+            id="lastName"
+            name="lastName"
             type="text"
             className="form-control mb-4"
             placeholder="Last name"
             onChange={formik.handleChange}
-            value={formik.values.employee.lastName}
+            value={formik.values.lastName}
           ></input>
           <input
-            id="employee.phone"
-            name="employee.phone"
+            id="phone"
+            name="phone"
             type="string"
             className="form-control mb-4"
             placeholder="Phone number"
             onChange={formik.handleChange}
-            value={formik.values.employee.phone}
+            value={formik.values.phone}
           ></input>
           <button type="submit" className="btn btn-success">
             Add
