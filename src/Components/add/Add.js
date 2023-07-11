@@ -1,10 +1,13 @@
 import React from "react";
 import { useFormik } from "formik";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const URI = `https://localhost:7189/api/employees`;
 
 export function Add() {
+  const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues: {
       employee: {
@@ -17,8 +20,8 @@ export function Add() {
       axios
         .post(URI, values.employee)
         .then((response) => {
-          document.location = "http://localhost:3000";
           alert("Successfully added employee!");
+          navigate("/");
         })
         .catch((error) => {
           const errors = error.response.data.errors;
