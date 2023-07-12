@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export function NavBar(): React.JSX.Element {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <span className="navbar-brand" style={{marginLeft: '20px'}}>ReactUI</span>
+            <span className="navbar-brand">ReactUI</span>
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item active">

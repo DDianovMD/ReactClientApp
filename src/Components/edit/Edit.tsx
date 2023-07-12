@@ -58,10 +58,10 @@ export function Edit(): React.JSX.Element {
   } else {
     return (
       <div className="d-flex justify-content-center flex-column">
-        <div style={{ alignSelf: "center" }}>
+        <div className="align-self-center">
           <h1>Edit employee</h1>
         </div>
-        <div style={{ width: "200px", alignSelf: "center" }}>
+        <div className="form-container">
           <form onSubmit={formik.handleSubmit}>
             <input
               id="firstName"

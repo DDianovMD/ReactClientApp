@@ -20,7 +20,7 @@ export function Home(): React.JSX.Element {
         axios.delete(URI + `/${id}`)
         .then((response) => { 
             alert('Successfully deleted employee!');
-            navigate("/");
+            setEmployees(employees.filter(employee => employee.id !== id));
         })
         .catch((error) => console.log(error));
     }
@@ -33,7 +33,7 @@ export function Home(): React.JSX.Element {
                 }
             })
             .catch((err) => console.log(err));
-    }, [employees])
+    }, [])
     
     if(employees.length === 0) {
         return <div>Loading...</div>
@@ -59,7 +59,7 @@ export function Home(): React.JSX.Element {
                             <td>{employee.lastName}</td>
                             <td>{employee.phone}</td>
                             <td>
-                                <Link to="/edit" state={{id: employee.id}} className="btn btn-warning" style={{marginRight: '10px'}}>Edit</Link>
+                                <Link to="/edit" state={{id: employee.id}} className="btn btn-warning edit-btn">Edit</Link>
                                 <button type="button" className="btn btn-danger" onClick={(event) => handleDeleteButtonClick(employee.id)}>Delete</button>
                             </td>
                         </tr> 

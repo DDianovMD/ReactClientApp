@@ -1,5 +1,3 @@
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Router from './Components/router/Router';
 // import { PrimeReactProvider } from 'primereact/api';
 // import { QueryClientProvider, QueryClient } from 'react-query';
