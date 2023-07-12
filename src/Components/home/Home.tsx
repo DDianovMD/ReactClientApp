@@ -1,18 +1,26 @@
 import React, {useState, useEffect} from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios'
 
-export function Home(props) {
-    const [employees, setEmployees] = useState([{}])
-    
-    const URI = 'https://localhost:7189/api/employees'
-    let counter = 1;
+type Employee = {
+    id: string,
+    firstName: string,
+    lastName: string,
+    phone: string,
+}
 
-    function handleDeleteButtonClick(id) {
+export function Home(): React.JSX.Element {
+    const [employees, setEmployees] = useState<Employee[]>([])
+    const navigate = useNavigate();
+
+    const URI = 'https://localhost:7189/api/employees'
+    let counter: number = 1;
+
+    function handleDeleteButtonClick(id: string) {
         axios.delete(URI + `/${id}`)
         .then((response) => { 
-            document.location = 'http://localhost:3000'
             alert('Successfully deleted employee!');
+            navigate("/");
         })
         .catch((error) => console.log(error));
     }
@@ -20,12 +28,14 @@ export function Home(props) {
     useEffect(() => {
         axios.get(URI)
             .then((response) => {
-                setEmployees(response.data)
+                if(typeof(response.data) === typeof(employees)) {
+                    setEmployees(response.data)
+                }
             })
             .catch((err) => console.log(err));
-    }, [])
+    }, [employees])
     
-    if(employees.length === 1) {
+    if(employees.length === 0) {
         return <div>Loading...</div>
     } else {
         return (

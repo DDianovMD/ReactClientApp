@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export function NavBar() {
+export function NavBar(): React.JSX.Element {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <span className="navbar-brand" style={{marginLeft: '20px'}}>ReactUI</span>

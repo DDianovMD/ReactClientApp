@@ -5,15 +5,23 @@ import { useNavigate } from "react-router-dom";
 
 const URI = `https://localhost:7189/api/employees`;
 
+type Employee = {
+  firstName: string,
+  lastName: string,
+  phone: string,
+}
+
 export function Add() {
   const navigate = useNavigate();
 
+  let employee: Employee = {
+      firstName: "",
+      lastName: "",
+      phone: "",
+  }
+
   const formik = useFormik({
-    initialValues: {
-        firstName: "",
-        lastName: "",
-        phone: "",
-    },
+    initialValues: employee,
     onSubmit: (values) => {
       axios
         .post(URI, values)
