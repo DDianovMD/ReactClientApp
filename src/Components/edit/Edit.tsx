@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FormikState, useFormik } from "formik";
 import { useQuery, useMutation } from "react-query";
+import { Toast } from "primereact/toast";
 
 type Employee = {
   id: string;
@@ -17,6 +18,8 @@ export function Edit(): React.JSX.Element {
   const URI = `https://localhost:7189/api/employees/${id}`;
 
   const navigate = useNavigate();
+
+  const toast = useRef<Toast>(null);
 
   const getEmployee = useQuery({
     queryKey: ["getEmployee"],
@@ -39,8 +42,8 @@ export function Edit(): React.JSX.Element {
         .put(URI, values)
         .then((response) => {
           if (response.status === 204) {
-            alert("Successfully updated employee!");
-            navigate("/");
+            showSuccessMessage();
+            setTimeout(() => navigate("/"), 5000);
           }
         })
         .catch((error) => console.log(error));
@@ -57,9 +60,30 @@ export function Edit(): React.JSX.Element {
   const formik = useFormik<Employee>({
     initialValues: employee,
     onSubmit: (employee) => {
-      editEmployee.mutate(employee);
+      if (employee !== formik.initialValues) {
+        editEmployee.mutate(employee);
+      } else {
+        showInfoMessage();
+      }
     },
   });
+
+  const showSuccessMessage = () => {
+    toast.current?.show({
+      severity: "success",
+      summary: "Employee updated.",
+      detail:
+        "Successfully updated employee! You will be redirected to homepage.",
+    });
+  };
+
+  const showInfoMessage = () => {
+    toast.current?.show({
+      severity: "info",
+      summary: "No changes were made.",
+      detail: "In order to update information you should change field values.",
+    });
+  };
 
   if (getEmployee.isLoading) {
     return <div>Loading...</div>;
@@ -67,45 +91,48 @@ export function Edit(): React.JSX.Element {
     return <div>Unexpected error occured. Please try again later.</div>;
   } else {
     return (
-      <div className="d-flex justify-content-center flex-column">
-        <div className="align-self-center">
-          <h1>Edit employee</h1>
+      <>
+        <Toast ref={toast} />
+        <div className="d-flex justify-content-center flex-column">
+          <div className="align-self-center">
+            <h1>Edit employee</h1>
+          </div>
+          <div className="form-container">
+            <form onSubmit={formik.handleSubmit}>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                className="form-control mb-4"
+                placeholder="First name"
+                defaultValue={formik.values.firstName}
+                onChange={formik.handleChange}
+              ></input>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                className="form-control mb-4"
+                placeholder="Last name"
+                defaultValue={formik.values.lastName}
+                onChange={formik.handleChange}
+              ></input>
+              <input
+                id="phone"
+                name="phone"
+                type="string"
+                className="form-control mb-4"
+                placeholder="Phone number"
+                defaultValue={formik.values.phone}
+                onChange={formik.handleChange}
+              ></input>
+              <button type="submit" className="btn btn-success">
+                Save
+              </button>
+            </form>
+          </div>
         </div>
-        <div className="form-container">
-          <form onSubmit={formik.handleSubmit}>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              className="form-control mb-4"
-              placeholder="First name"
-              defaultValue={formik.values.firstName}
-              onChange={formik.handleChange}
-            ></input>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              className="form-control mb-4"
-              placeholder="Last name"
-              defaultValue={formik.values.lastName}
-              onChange={formik.handleChange}
-            ></input>
-            <input
-              id="phone"
-              name="phone"
-              type="string"
-              className="form-control mb-4"
-              placeholder="Phone number"
-              defaultValue={formik.values.phone}
-              onChange={formik.handleChange}
-            ></input>
-            <button type="submit" className="btn btn-success">
-              Save
-            </button>
-          </form>
-        </div>
-      </div>
+      </>
     );
   }
 }
