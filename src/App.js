@@ -1,19 +1,19 @@
 import Router from './Components/router/Router';
+import { QueryClientProvider, QueryClient } from 'react-query';
 // import { PrimeReactProvider } from 'primereact/api';
-// import { QueryClientProvider, QueryClient } from 'react-query';
 // import { PrimeReactHomePage } from './Components/prime-react-homepage/PrimeReactHomePage';
 
-// const queryClient = new QueryClient();
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <div className="App">
-      <Router />
-      {/* <QueryClientProvider client={queryClient}>
-        <PrimeReactProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router />
+        {/* <PrimeReactProvider>
           <PrimeReactHomePage></PrimeReactHomePage>
-        </PrimeReactProvider>
-      </QueryClientProvider> */}
+        </PrimeReactProvider> */}
+      </QueryClientProvider>
     </div>
   );
 }

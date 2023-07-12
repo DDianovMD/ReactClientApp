@@ -1,7 +1,8 @@
-import axios from "axios";
-import { FormikState, useFormik } from "formik";
 import React, { useEffect } from "react";
+import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { FormikState, useFormik } from "formik";
+import { useQuery, useMutation } from "react-query";
 
 type Employee = {
   id: string;
@@ -12,10 +13,39 @@ type Employee = {
 
 export function Edit(): React.JSX.Element {
   const { state } = useLocation();
-  const navigate = useNavigate();
-
   const id = state.id;
   const URI = `https://localhost:7189/api/employees/${id}`;
+
+  const navigate = useNavigate();
+
+  const getEmployee = useQuery({
+    queryKey: ["getEmployee"],
+    queryFn: () => {
+      axios
+        .get(URI)
+        .then((response) => {
+          let nextState: Partial<FormikState<Employee>> = {
+            values: response.data,
+          };
+          formik.resetForm(nextState);
+        })
+        .catch((error) => console.log(error));
+    },
+  });
+
+  const editEmployee = useMutation({
+    mutationFn: (values: Employee) => {
+      return axios
+        .put(URI, values)
+        .then((response) => {
+          if (response.status === 204) {
+            alert("Successfully updated employee!");
+            navigate("/");
+          }
+        })
+        .catch((error) => console.log(error));
+    },
+  });
 
   let employee: Employee = {
     id: "",
@@ -26,35 +56,15 @@ export function Edit(): React.JSX.Element {
 
   const formik = useFormik<Employee>({
     initialValues: employee,
-
-    onSubmit: (values) => {
-      axios
-        .put(URI, values)
-        .then((response) => {
-          if (response.status === 204) {
-            alert("Successfully updated employee!");
-            navigate("/")
-          }
-        })
-        .catch((error) => console.log(error));
+    onSubmit: (employee) => {
+      editEmployee.mutate(employee);
     },
   });
 
-  useEffect(() => {
-    axios
-      .get(URI)
-      .then((response) => {
-        let nextState: Partial<FormikState<Employee>> = {
-          values: response.data
-        }
-
-        formik.resetForm(nextState);
-      })
-      .catch((error) => console.log(error));
-  }, []);
-
-  if (formik.values.firstName === "") {
+  if (getEmployee.isLoading) {
     return <div>Loading...</div>;
+  } else if (getEmployee.isError) {
+    return <div>Unexpected error occured. Please try again later.</div>;
   } else {
     return (
       <div className="d-flex justify-content-center flex-column">
