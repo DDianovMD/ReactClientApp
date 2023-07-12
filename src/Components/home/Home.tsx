@@ -10,7 +10,7 @@ type Employee = {
   phone: string;
 };
 
-export function Home(): React.JSX.Element {
+export function EmployeeList(): React.JSX.Element {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const queryClient = useQueryClient();
 
