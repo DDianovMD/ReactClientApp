@@ -3,24 +3,15 @@ import { useFormik } from "formik";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "primereact/toast";
+import { Employee } from "../../Models/Employee";
 
 const URI = `https://localhost:7189/api/employees`;
-
-type Employee = {
-  firstName: string;
-  lastName: string;
-  phone: string;
-};
 
 export function Add() {
   const navigate = useNavigate();
   const toast = useRef<Toast>(null);
 
-  let employee: Employee = {
-    firstName: "",
-    lastName: "",
-    phone: "",
-  };
+  let employee = new Employee();
 
   const formik = useFormik({
     initialValues: employee,

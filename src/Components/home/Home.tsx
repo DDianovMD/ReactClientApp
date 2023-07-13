@@ -3,13 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { Toast } from "primereact/toast";
-
-type Employee = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-};
+import { Employee } from "../../Models/Employee";
 
 export function EmployeeList(): React.JSX.Element {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -82,7 +76,7 @@ export function EmployeeList(): React.JSX.Element {
   } else if (getEmployeesQuery.isError) {
     return <div>Unexpected error occured. Please try again later.</div>;
   } else {
-    if (getEmployeesQuery.isFetched && employees.length == 0) {
+    if (getEmployeesQuery.isFetched && employees.length === 0) {
       return (
         <>
           <div className="mb-5 mt-5">Employees not found.</div>

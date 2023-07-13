@@ -4,13 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FormikState, useFormik } from "formik";
 import { useQuery, useMutation } from "react-query";
 import { Toast } from "primereact/toast";
-
-type Employee = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-};
+import { Employee } from "../../Models/Employee";
 
 export function Edit(): React.JSX.Element {
   const { state } = useLocation();
@@ -50,21 +44,16 @@ export function Edit(): React.JSX.Element {
     },
   });
 
-  let employee: Employee = {
-    id: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-  };
+  let employee = new Employee();
 
   const formik = useFormik<Employee>({
     initialValues: employee,
     onSubmit: (employee) => {
-      if (employee !== formik.initialValues) {
-        editEmployee.mutate(employee);
-      } else {
-        showInfoMessage();
-      }
+        if(employee !== formik.initialValues) {
+            editEmployee.mutate(employee);
+        } else {
+            showInfoMessage();
+        }
     },
   });
 
@@ -72,18 +61,17 @@ export function Edit(): React.JSX.Element {
     toast.current?.show({
       severity: "success",
       summary: "Employee updated.",
-      detail:
-        "Successfully updated employee! You will be redirected to homepage.",
+      detail: "Successfully updated employee! You will be redirected to homepage.",
     });
   };
 
   const showInfoMessage = () => {
     toast.current?.show({
-      severity: "info",
-      summary: "No changes were made.",
-      detail: "In order to update information you should change field values.",
-    });
-  };
+        severity: "info",
+        summary: "No changes were made.",
+        detail: "In order to update information you should change field values.",
+      });
+  }
 
   if (getEmployee.isLoading) {
     return <div>Loading...</div>;
