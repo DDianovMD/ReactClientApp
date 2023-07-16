@@ -22,6 +22,7 @@ import { EmployeeContext } from "../../Models/EmployeeContext";
 export function PrimeReactHomePage() {
   const [addVisibility, setAddVisibility] = useState(false);
   const [editVisibility, setEditVisibility] = useState(false);
+  const [editedCSS, setEditedCSS] = useState('visibility-hidden')
   const [id, setId] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const toast = useRef<Toast>(null);
@@ -253,6 +254,7 @@ export function PrimeReactHomePage() {
                     setId(rowData.id);
                     getByIdQuery(rowData.id);
                     setEditVisibility(true);
+                    setEditedCSS('visibility-visible');
                   }}
                 />
                 <Button
@@ -301,7 +303,10 @@ export function PrimeReactHomePage() {
         </Sidebar>
         <Sidebar
           visible={editVisibility}
-          onHide={() => setEditVisibility(false)}
+          onHide={() => {
+            setEditVisibility(false);
+            setEditedCSS('visibility-hidden');
+          }}
         >
           <h2>Edit employee</h2>
           <form onSubmit={editFormik.handleSubmit}>
@@ -344,6 +349,10 @@ export function PrimeReactHomePage() {
           </form>
         </Sidebar>
         <Button icon="pi pi-plus" onClick={() => setAddVisibility(true)} />
+        {editFormik.values.firstName !== '' && editFormik.values.lastName !== '' ? 
+        (<div className={editedCSS}>
+          Currently editing {editFormik.values.firstName} {editFormik.values.lastName}
+        </div>) : (<></>)}
       </>
     );
   }

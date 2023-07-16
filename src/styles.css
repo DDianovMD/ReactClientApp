@@ -62,4 +62,12 @@ code {
 .form-container {
   width: 200px;
   align-self: center;
+}
+
+.visibility-hidden {
+  visibility: hidden;
+}
+
+.visibility-visible {
+  visibility: visible;
 }/*# sourceMappingURL=styles.css.map */
