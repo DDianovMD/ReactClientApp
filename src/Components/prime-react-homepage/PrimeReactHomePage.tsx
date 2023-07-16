@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { Skeleton } from "primereact/skeleton";
 import { DataTable, DataTableValue } from "primereact/datatable";
@@ -10,20 +9,29 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import { useFormik, FormikState } from "formik";
 import { Employee } from "../../Models/Employee";
+import {
+  getEmployees,
+  getEmployeeById,
+  addEmployee,
+  updateEmployee,
+  deleteEmployee,
+} from "../../api/apicalls";
+import { useContext } from "react";
+import { EmployeeContext } from "../../Models/EmployeeContext";
 
 export function PrimeReactHomePage() {
-  const URI = "https://localhost:7189/api/employees";
   const [addVisibility, setAddVisibility] = useState(false);
   const [editVisibility, setEditVisibility] = useState(false);
   const [id, setId] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const toast = useRef<Toast>(null);
   const queryClient = useQueryClient();
-
+  const editedEmployee = useContext(EmployeeContext);
+  console.log(editedEmployee);
   const addFormik = useFormik<Employee>({
     initialValues: new Employee(),
     onSubmit: (values) => {
-      addEmployee.mutate(values);
+      addEmployeeMutation.mutate(values);
     },
   });
 
@@ -31,18 +39,18 @@ export function PrimeReactHomePage() {
     initialValues: new Employee(),
     onSubmit: (employee) => {
       if (employee !== editFormik.initialValues) {
-        editEmployee.mutate(employee);
+        updateEmployeeMutation.mutate(employee);
       } else {
         showInfoMessage();
       }
     },
   });
 
+  // Queries and mutations
   const getEmployeesQuery = useQuery({
     queryKey: ["getEmployees"],
     queryFn: () => {
-      return axios
-        .get(URI)
+      return getEmployees()
         .then((response) => {
           if (typeof response.data === typeof employees) {
             setEmployees(response.data);
@@ -57,26 +65,20 @@ export function PrimeReactHomePage() {
     },
   });
 
-  const getByIdQuery = useQuery({
-    queryKey: ["getEmployee", id],
-    queryFn: () => {
-      axios
-        .get(URI + `/${id}`)
-        .then((response) => {
-          let nextState: Partial<FormikState<Employee>> = {
-            values: response.data,
-          };
-          editFormik.resetForm(nextState);
-        })
-        .catch((error) => console.log(error));
-    },
-    enabled: false,
-  });
+  const getByIdQuery = async (id: string) => {
+    getEmployeeById(id)
+      .then((response) => {
+        let nextState: Partial<FormikState<Employee>> = {
+          values: response.data,
+        };
+        editFormik.resetForm(nextState);
+      })
+      .catch((error) => console.log(error));
+  };
 
-  const addEmployee = useMutation({
+  const addEmployeeMutation = useMutation({
     mutationFn: (employee: Employee) => {
-      return axios
-        .post(URI, employee)
+      return addEmployee(employee)
         .then((response) => {
           if (response.status === 201) {
             showAdded();
@@ -106,10 +108,9 @@ export function PrimeReactHomePage() {
     },
   });
 
-  const editEmployee = useMutation({
+  const updateEmployeeMutation = useMutation({
     mutationFn: (values: Employee) => {
-      return axios
-        .put(URI + `/${id}`, values)
+      return updateEmployee(id, values)
         .then((response) => {
           if (response.status === 204) {
             showEdited();
@@ -122,10 +123,9 @@ export function PrimeReactHomePage() {
     },
   });
 
-  const deleteEmployee = useMutation({
+  const deleteEmployeeMutation = useMutation({
     mutationFn: (id: string) => {
-      return axios
-        .delete(URI + `/${id}`)
+      return deleteEmployee(id)
         .then((response) => {
           if (response.status === 200) {
             setEmployees(employees.filter((employee) => employee.id !== id));
@@ -181,7 +181,10 @@ export function PrimeReactHomePage() {
     });
   };
 
-  const showDeleteErrorMessage = (summary: string, errorMessage: string): void => {
+  const showDeleteErrorMessage = (
+    summary: string,
+    errorMessage: string
+  ): void => {
     toast.current?.show({
       severity: "error",
       summary: summary,
@@ -199,11 +202,11 @@ export function PrimeReactHomePage() {
 
   const showInfoMessage = () => {
     toast.current?.show({
-        severity: "info",
-        summary: "No changes were made.",
-        detail: "In order to update information you should change field values.",
-      });
-  }
+      severity: "info",
+      summary: "No changes were made.",
+      detail: "In order to update information you should change field values.",
+    });
+  };
 
   if (getEmployeesQuery.isLoading) {
     return (
@@ -248,13 +251,13 @@ export function PrimeReactHomePage() {
                   style={{ marginRight: "15px" }}
                   onClick={() => {
                     setId(rowData.id);
-                    getByIdQuery.refetch();
+                    getByIdQuery(rowData.id);
                     setEditVisibility(true);
                   }}
                 />
                 <Button
                   icon="pi pi-trash"
-                  onClick={() => deleteEmployee.mutate(rowData.id)}
+                  onClick={() => deleteEmployeeMutation.mutate(rowData.id)}
                 />
               </>
             )}
@@ -300,56 +303,45 @@ export function PrimeReactHomePage() {
           visible={editVisibility}
           onHide={() => setEditVisibility(false)}
         >
-          {getByIdQuery.isLoading ? (
-            <>
-              <h2>Edit employee</h2>
-              <Skeleton></Skeleton>
-              <Skeleton></Skeleton>
-              <Skeleton></Skeleton>
-            </>
-          ) : (
-            <>
-              <h2>Edit employee</h2>
-              <form onSubmit={editFormik.handleSubmit}>
-                <InputText
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  placeholder="First name"
-                  style={{ marginBottom: "15px" }}
-                  defaultValue={editFormik.values.firstName}
-                  onChange={editFormik.handleChange}
-                />
-                <InputText
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  placeholder="Last name"
-                  style={{ marginBottom: "15px" }}
-                  defaultValue={editFormik.values.lastName}
-                  onChange={editFormik.handleChange}
-                />
-                <InputText
-                  id="phone"
-                  name="phone"
-                  type="text"
-                  placeholder="Phone"
-                  style={{ marginBottom: "15px" }}
-                  defaultValue={editFormik.values.phone}
-                  onChange={editFormik.handleChange}
-                />
-                <div style={{ marginLeft: "75px" }}>
-                  <Button
-                    type="submit"
-                    icon="pi pi-save"
-                    onClick={(event) => {
-                      setEditVisibility(false);
-                    }}
-                  />
-                </div>
-              </form>
-            </>
-          )}
+          <h2>Edit employee</h2>
+          <form onSubmit={editFormik.handleSubmit}>
+            <InputText
+              id="firstName"
+              name="firstName"
+              type="text"
+              placeholder="First name"
+              style={{ marginBottom: "15px" }}
+              defaultValue={editFormik.values.firstName}
+              onChange={editFormik.handleChange}
+            />
+            <InputText
+              id="lastName"
+              name="lastName"
+              type="text"
+              placeholder="Last name"
+              style={{ marginBottom: "15px" }}
+              defaultValue={editFormik.values.lastName}
+              onChange={editFormik.handleChange}
+            />
+            <InputText
+              id="phone"
+              name="phone"
+              type="text"
+              placeholder="Phone"
+              style={{ marginBottom: "15px" }}
+              defaultValue={editFormik.values.phone}
+              onChange={editFormik.handleChange}
+            />
+            <div style={{ marginLeft: "75px" }}>
+              <Button
+                type="submit"
+                icon="pi pi-save"
+                onClick={(event) => {
+                  setEditVisibility(false);
+                }}
+              />
+            </div>
+          </form>
         </Sidebar>
         <Button icon="pi pi-plus" onClick={() => setAddVisibility(true)} />
       </>
