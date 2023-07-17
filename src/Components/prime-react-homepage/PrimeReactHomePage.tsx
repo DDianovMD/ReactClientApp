@@ -7,6 +7,7 @@ import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import {showAdded, showEdited, showDeleteSuccessMessage, showDeleteErrorMessage, showValidationErrorMessage, showInfoMessage} from "../../toast/messages"
 import { useFormik, FormikState } from "formik";
 import { Employee } from "../../Models/Employee";
 import {
@@ -42,7 +43,7 @@ export function PrimeReactHomePage() {
       if (employee !== editFormik.initialValues) {
         updateEmployeeMutation.mutate(employee);
       } else {
-        showInfoMessage();
+        showInfoMessage(toast);
       }
     },
   });
@@ -82,7 +83,7 @@ export function PrimeReactHomePage() {
       return addEmployee(employee)
         .then((response) => {
           if (response.status === 201) {
-            showAdded();
+            showAdded(toast);
           } else {
             throw new Error(
               `Unexpected server response. Server responded with status code ${response.status}`
@@ -100,7 +101,7 @@ export function PrimeReactHomePage() {
             }
           }
 
-          showValidationErrorMessage("All fields are required.");
+          showValidationErrorMessage(toast, "All fields are required.");
           console.error(errorMessage);
         });
     },
@@ -114,7 +115,7 @@ export function PrimeReactHomePage() {
       return updateEmployee(id, values)
         .then((response) => {
           if (response.status === 204) {
-            showEdited();
+            showEdited(toast);
           }
         })
         .catch((error) => console.log(error));
@@ -132,11 +133,11 @@ export function PrimeReactHomePage() {
             setEmployees(employees.filter((employee) => employee.id !== id));
             const messageSummary = "Employee deleted.";
             const message = "Successfully deleted employee!";
-            showDeleteSuccessMessage(messageSummary, message);
+            showDeleteSuccessMessage(toast, messageSummary, message);
           } else {
             const messageSummary = "Error!";
             const message = "Unexpected error occured. Please try again later.";
-            showDeleteErrorMessage(messageSummary, message);
+            showDeleteErrorMessage(toast, messageSummary, message);
           }
         })
         .catch((error) => console.log(error));
@@ -154,60 +155,6 @@ export function PrimeReactHomePage() {
   function bodyTemplate(): JSX.Element {
     return <Skeleton></Skeleton>;
   }
-
-  // Toast
-  const showAdded = (): void => {
-    toast.current?.show({
-      severity: "success",
-      summary: "Info",
-      detail: "Employee added successfuly!",
-      life: 3000,
-    });
-  };
-
-  const showEdited = (): void => {
-    toast.current?.show({
-      severity: "warn",
-      summary: "Info",
-      detail: "Employee edited successfuly!",
-      life: 3000,
-    });
-  };
-
-  const showDeleteSuccessMessage = (summary: string, message: string) => {
-    toast.current?.show({
-      severity: "success",
-      summary: summary,
-      detail: message,
-    });
-  };
-
-  const showDeleteErrorMessage = (
-    summary: string,
-    errorMessage: string
-  ): void => {
-    toast.current?.show({
-      severity: "error",
-      summary: summary,
-      detail: errorMessage,
-    });
-  };
-
-  const showValidationErrorMessage = (errorMessage: string): void => {
-    toast.current?.show({
-      severity: "error",
-      summary: "Invalid data.",
-      detail: errorMessage,
-    });
-  };
-
-  const showInfoMessage = () => {
-    toast.current?.show({
-      severity: "info",
-      summary: "No changes were made.",
-      detail: "In order to update information you should change field values.",
-    });
-  };
 
   if (getEmployeesQuery.isLoading) {
     return (
