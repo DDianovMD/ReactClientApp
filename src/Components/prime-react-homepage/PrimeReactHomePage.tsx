@@ -1,154 +1,36 @@
 import React, { useState, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useQueryClient } from "react-query";
 import { Skeleton } from "primereact/skeleton";
 import { DataTable, DataTableValue } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
-import {showAdded, showEdited, showDeleteSuccessMessage, showDeleteErrorMessage, showValidationErrorMessage, showInfoMessage} from "../../toast/messages"
-import { useFormik, FormikState } from "formik";
 import { Employee } from "../../Models/Employee";
 import {
-  getEmployees,
-  getEmployeeById,
-  addEmployee,
-  updateEmployee,
-  deleteEmployee,
-} from "../../api/apicalls";
-import { useContext } from "react";
-import { EmployeeContext } from "../../Models/EmployeeContext";
+  useGetEmployeesQuery,
+  useGetByIdQuery,
+  useDeleteEmployeeMutation,
+} from "../../queries/employeeQueries";
+import {
+  showDeleteSuccessMessage,
+  showDeleteErrorMessage,
+} from "../../toast/messages";
+import Add from "../add/Add";
+import Edit from "../edit/Edit";
+import { AxiosResponse } from "axios";
 
 export function PrimeReactHomePage() {
   const [addVisibility, setAddVisibility] = useState(false);
   const [editVisibility, setEditVisibility] = useState(false);
-  const [editedCSS, setEditedCSS] = useState('visibility-hidden')
   const [id, setId] = useState<string>("");
+  const [employee, setEmployee] = useState<Employee>(new Employee());
   const [employees, setEmployees] = useState<Employee[]>([]);
   const toast = useRef<Toast>(null);
   const queryClient = useQueryClient();
-  const editedEmployee = useContext(EmployeeContext);
-  console.log(editedEmployee);
-  const addFormik = useFormik<Employee>({
-    initialValues: new Employee(),
-    onSubmit: (values) => {
-      addEmployeeMutation.mutate(values);
-    },
-  });
-
-  const editFormik = useFormik<Employee>({
-    initialValues: new Employee(),
-    onSubmit: (employee) => {
-      if (employee !== editFormik.initialValues) {
-        updateEmployeeMutation.mutate(employee);
-      } else {
-        showInfoMessage(toast);
-      }
-    },
-  });
-
-  // Queries and mutations
-  const getEmployeesQuery = useQuery({
-    queryKey: ["getEmployees"],
-    queryFn: () => {
-      return getEmployees()
-        .then((response) => {
-          if (typeof response.data === typeof employees) {
-            setEmployees(response.data);
-          } else {
-            throw new Error(
-              `Fetching employees results in response data type different from Employee[] ` +
-                `(response data type: ${typeof response.data}).`
-            );
-          }
-        })
-        .catch((err) => console.error(err));
-    },
-  });
-
-  const getByIdQuery = async (id: string) => {
-    getEmployeeById(id)
-      .then((response) => {
-        let nextState: Partial<FormikState<Employee>> = {
-          values: response.data,
-        };
-        editFormik.resetForm(nextState);
-      })
-      .catch((error) => console.log(error));
-  };
-
-  const addEmployeeMutation = useMutation({
-    mutationFn: (employee: Employee) => {
-      return addEmployee(employee)
-        .then((response) => {
-          if (response.status === 201) {
-            showAdded(toast);
-          } else {
-            throw new Error(
-              `Unexpected server response. Server responded with status code ${response.status}`
-            );
-          }
-        })
-        .catch((error) => {
-          const errors = error.response.data.errors;
-          let errorMessage = "";
-
-          for (const key in errors) {
-            if (Object.hasOwnProperty.call(errors, key)) {
-              const element = errors[key];
-              errorMessage += element + "\n";
-            }
-          }
-
-          showValidationErrorMessage(toast, "All fields are required.");
-          console.error(errorMessage);
-        });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
-    },
-  });
-
-  const updateEmployeeMutation = useMutation({
-    mutationFn: (values: Employee) => {
-      return updateEmployee(id, values)
-        .then((response) => {
-          if (response.status === 204) {
-            showEdited(toast);
-          }
-        })
-        .catch((error) => console.log(error));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
-    },
-  });
-
-  const deleteEmployeeMutation = useMutation({
-    mutationFn: (id: string) => {
-      return deleteEmployee(id)
-        .then((response) => {
-          if (response.status === 200) {
-            setEmployees(employees.filter((employee) => employee.id !== id));
-            const messageSummary = "Employee deleted.";
-            const message = "Successfully deleted employee!";
-            showDeleteSuccessMessage(toast, messageSummary, message);
-          } else {
-            const messageSummary = "Error!";
-            const message = "Unexpected error occured. Please try again later.";
-            showDeleteErrorMessage(toast, messageSummary, message);
-          }
-        })
-        .catch((error) => console.log(error));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
-    },
-  });
 
   // Skeleton set
-  const items: DataTableValue[] = Array.from(
+  const skeletonItems: DataTableValue[] = Array.from(
     { length: 5 },
     (v, i) => i as unknown as DataTableValue
   );
@@ -156,9 +38,69 @@ export function PrimeReactHomePage() {
     return <Skeleton></Skeleton>;
   }
 
-  if (getEmployeesQuery.isLoading) {
+  // Queries and mutations
+  const employeesQuery = useGetEmployeesQuery(
+    (data: AxiosResponse<Employee[]>) => {
+      if (isEmployeeArray(data.data)) {
+        setEmployees(data.data);
+      } else {
+        throw new Error(
+          `Fetching employees results in response data type different from Employee[] ` +
+            `(response data type: ${typeof data}).`
+        );
+      }
+    }
+  );
+
+  const employeeQuery = useGetByIdQuery(id, (data: AxiosResponse<Employee>) => {
+    console.log(data.data)
+    if (isEmployee(data.data)) {
+      console.log(data + ' data')
+      console.log(data.data + ' data.data')
+      setEmployee(data.data);
+    } else {
+      throw new Error("Server response didn't return object of type Employee");
+    }
+  });
+
+  const deleteEmployee = useDeleteEmployeeMutation((data) => {
+    if (data.status === 200) {
+      setEmployees(employees.filter((employee) => employee.id !== id));
+      const messageSummary = "Employee deleted.";
+      const message = "Successfully deleted employee!";
+      showDeleteSuccessMessage(toast, messageSummary, message);
+    } else {
+      const messageSummary = "Error!";
+      const message = "Unexpected error occured. Please try again later.";
+      showDeleteErrorMessage(toast, messageSummary, message);
+    }
+    queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
+  });
+
+  function isEmployeeArray(object: any): object is Employee[] {
+    let result: boolean = false;
+    result = Array.isArray(object);
+    for (const entity of object) {
+      result = "id" in entity;
+      result = "firstName" in entity;
+      result = "lastName" in entity;
+      result = "phone" in entity;
+    }
+    return result;
+  }
+
+  function isEmployee(object: any): object is Employee {
+    let result: boolean = false;
+    result = "id" in object;
+    result = "firstName" in object;
+    result = "lastName" in object;
+    result = "phone" in object;
+    return result;
+  }
+
+  if (employeesQuery.isLoading) {
     return (
-      <DataTable value={items} className="p-datatable-striped">
+      <DataTable value={skeletonItems} className="p-datatable-striped">
         <Column
           field="firstName"
           header="First name"
@@ -199,107 +141,34 @@ export function PrimeReactHomePage() {
                   style={{ marginRight: "15px" }}
                   onClick={() => {
                     setId(rowData.id);
-                    getByIdQuery(rowData.id);
+                    employeeQuery.refetch(rowData.id);
                     setEditVisibility(true);
-                    setEditedCSS('visibility-visible');
                   }}
                 />
                 <Button
                   icon="pi pi-trash"
-                  onClick={() => deleteEmployeeMutation.mutate(rowData.id)}
+                  onClick={() => deleteEmployee.mutate(rowData.id)}
                 />
               </>
             )}
           ></Column>
         </DataTable>
         <Sidebar visible={addVisibility} onHide={() => setAddVisibility(false)}>
-          <h2>Add employee</h2>
-          <form onSubmit={addFormik.handleSubmit}>
-            <InputText
-              id="firstName"
-              name="firstName"
-              type="text"
-              placeholder="First name"
-              style={{ marginBottom: "15px" }}
-              onChange={addFormik.handleChange}
-            />
-            <InputText
-              id="lastName"
-              name="lastName"
-              type="text"
-              placeholder="Last name"
-              style={{ marginBottom: "15px" }}
-              onChange={addFormik.handleChange}
-            />
-            <InputText
-              id="phone"
-              name="phone"
-              type="text"
-              placeholder="Phone"
-              style={{ marginBottom: "15px" }}
-              onChange={addFormik.handleChange}
-            />
-            <div style={{ marginLeft: "75px" }}>
-              <Button
-                type="submit"
-                icon="pi pi-check"
-                onClick={() => setAddVisibility(false)}
-              />
-            </div>
-          </form>
+          <Add toast={toast} setAddVisibility={setAddVisibility} />
         </Sidebar>
         <Sidebar
           visible={editVisibility}
           onHide={() => {
             setEditVisibility(false);
-            setEditedCSS('visibility-hidden');
           }}
         >
-          <h2>Edit employee</h2>
-          <form onSubmit={editFormik.handleSubmit}>
-            <InputText
-              id="firstName"
-              name="firstName"
-              type="text"
-              placeholder="First name"
-              style={{ marginBottom: "15px" }}
-              defaultValue={editFormik.values.firstName}
-              onChange={editFormik.handleChange}
-            />
-            <InputText
-              id="lastName"
-              name="lastName"
-              type="text"
-              placeholder="Last name"
-              style={{ marginBottom: "15px" }}
-              defaultValue={editFormik.values.lastName}
-              onChange={editFormik.handleChange}
-            />
-            <InputText
-              id="phone"
-              name="phone"
-              type="text"
-              placeholder="Phone"
-              style={{ marginBottom: "15px" }}
-              defaultValue={editFormik.values.phone}
-              onChange={editFormik.handleChange}
-            />
-            <div style={{ marginLeft: "75px" }}>
-              <Button
-                type="submit"
-                icon="pi pi-save"
-                onClick={(event) => {
-                  setEditVisibility(false);
-                }}
-              />
-            </div>
-          </form>
+          <Edit
+            toast={toast}
+            setEditVisibility={setEditVisibility}
+            employee={employee}
+          />
         </Sidebar>
         <Button icon="pi pi-plus" onClick={() => setAddVisibility(true)} />
-        {editFormik.values.firstName !== '' && editFormik.values.lastName !== '' ? 
-        (<div className={editedCSS}>
-          Currently editing {editFormik.values.firstName} {editFormik.values.lastName}
-        </div>) : (<></>)}
       </>
     );
   }
