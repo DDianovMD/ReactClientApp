@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import { useQueryClient } from "react-query";
 import { Employee } from "../../Models/Employee";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { useAddEmployeeMutation } from "../../queries/employeeQueries";
-import { showAdded, showValidationErrorMessage } from "../../toast/messages";
+import { AddEmployeeMutation } from "../../queries/employeeQueries";
+import { showMessage } from "../../toast/messages";
 import { AddProps } from "../../Models/AddProps";
 
 const Add = ({ toast, setAddVisibility }: AddProps) => {
   const queryClient = useQueryClient();
 
-  const addEmployee = useAddEmployeeMutation(
+  const addEmployee = AddEmployeeMutation(
     (data) => {
       if (data.status === 201) {
-        showAdded(toast);
+        const messageSummary = "Info";
+        const message = "Employee added successfuly!"
+        showMessage(toast, "success", messageSummary, message);
       } else {
         throw new Error(
           `Unexpected server response. Server responded with status code ${data.status}`
@@ -31,7 +33,10 @@ const Add = ({ toast, setAddVisibility }: AddProps) => {
           errorMessage += element + "\n";
         }
       }
-      showValidationErrorMessage(toast, "All fields are required.");
+
+      const messageSummary = "Invalid data."
+      const message = "All fields are required."
+      showMessage(toast, "error", messageSummary, message);
       console.error(errorMessage);
     }
   );

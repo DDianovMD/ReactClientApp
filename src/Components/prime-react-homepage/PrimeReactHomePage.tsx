@@ -8,17 +8,17 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Employee } from "../../Models/Employee";
 import {
-  useGetEmployeesQuery,
-  useGetByIdQuery,
-  useDeleteEmployeeMutation,
+  GetEmployeesQuery,
+  GetByIdQuery,
+  DeleteEmployeeMutation,
 } from "../../queries/employeeQueries";
 import {
-  showDeleteSuccessMessage,
-  showDeleteErrorMessage,
+  showMessage,
 } from "../../toast/messages";
 import Add from "../add/Add";
 import Edit from "../edit/Edit";
 import { AxiosResponse } from "axios";
+import { EmployeeContext } from "../../Models/EmployeeContext";
 
 export function PrimeReactHomePage() {
   const [addVisibility, setAddVisibility] = useState(false);
@@ -39,7 +39,7 @@ export function PrimeReactHomePage() {
   }
 
   // Queries and mutations
-  const employeesQuery = useGetEmployeesQuery(
+  const employeesQuery = GetEmployeesQuery(
     (data: AxiosResponse<Employee[]>) => {
       if (isEmployeeArray(data.data)) {
         setEmployees(data.data);
@@ -52,27 +52,24 @@ export function PrimeReactHomePage() {
     }
   );
 
-  const employeeQuery = useGetByIdQuery(id, (data: AxiosResponse<Employee>) => {
-    console.log(data.data)
+  const employeeQuery = GetByIdQuery(id, (data: AxiosResponse<Employee>) => {
     if (isEmployee(data.data)) {
-      console.log(data + ' data')
-      console.log(data.data + ' data.data')
       setEmployee(data.data);
     } else {
       throw new Error("Server response didn't return object of type Employee");
     }
   });
 
-  const deleteEmployee = useDeleteEmployeeMutation((data) => {
+  const deleteEmployee = DeleteEmployeeMutation((data) => {
     if (data.status === 200) {
       setEmployees(employees.filter((employee) => employee.id !== id));
       const messageSummary = "Employee deleted.";
       const message = "Successfully deleted employee!";
-      showDeleteSuccessMessage(toast, messageSummary, message);
+      showMessage(toast, "success", messageSummary, message);
     } else {
       const messageSummary = "Error!";
       const message = "Unexpected error occured. Please try again later.";
-      showDeleteErrorMessage(toast, messageSummary, message);
+      showMessage(toast, "error", messageSummary, message);
     }
     queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
   });
@@ -156,17 +153,16 @@ export function PrimeReactHomePage() {
         <Sidebar visible={addVisibility} onHide={() => setAddVisibility(false)}>
           <Add toast={toast} setAddVisibility={setAddVisibility} />
         </Sidebar>
+        {console.log(employee)}
         <Sidebar
           visible={editVisibility}
           onHide={() => {
             setEditVisibility(false);
           }}
         >
-          <Edit
-            toast={toast}
-            setEditVisibility={setEditVisibility}
-            employee={employee}
-          />
+          <EmployeeContext.Provider value={employee}>
+            <Edit toast={toast} setEditVisibility={setEditVisibility} />
+          </EmployeeContext.Provider>
         </Sidebar>
         <Button icon="pi pi-plus" onClick={() => setAddVisibility(true)} />
       </>

@@ -1,20 +1,23 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useFormik } from "formik";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Employee } from "../../Models/Employee";
 import { EditProps } from "../../Models/EditProps";
-import { useUpdateEmployeeMutation } from "../../queries/employeeQueries";
-import { showInfoMessage } from "../../toast/messages";
+import { UpdateEmployeeMutation } from "../../queries/employeeQueries";
+import { showMessage } from "../../toast/messages";
 import { useQueryClient } from "react-query";
-import { showEdited } from "../../toast/messages";
+import { EmployeeContext } from "../../Models/EmployeeContext";
 
-const Edit = ({ toast, setEditVisibility, employee }: EditProps) => {
+const Edit = ({ toast, setEditVisibility }: EditProps) => {
   const queryClient = useQueryClient();
+  const employee = useContext(EmployeeContext);
 
-  const updateMutation = useUpdateEmployeeMutation((data) => {
+  const updateMutation = UpdateEmployeeMutation((data) => {
     if (data.status === 204) {
-      showEdited(toast);
+      const messageSummary = "Info";
+      const message = "Employee edited successfuly!"
+      showMessage(toast, "warn", messageSummary, message);
     }
 
     queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
@@ -26,7 +29,9 @@ const Edit = ({ toast, setEditVisibility, employee }: EditProps) => {
       if (employee !== editFormik.initialValues) {
         updateMutation.mutate(employee);
       } else {
-        showInfoMessage(toast);
+        const messageSummary = "No changes were made.";
+        const message = "In order to update information you should change field values.";
+        showMessage(toast, "info", messageSummary, message);
       }
     },
   });

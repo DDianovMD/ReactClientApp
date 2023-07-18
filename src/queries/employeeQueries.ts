@@ -7,7 +7,7 @@ import {
   deleteEmployee,
 } from "../api/apicalls";
 
-export const useAddEmployeeMutation = (onSuccess: (data: any) => void, onError: (error: any) => void) => {
+export const AddEmployeeMutation = (onSuccess: (data: any) => void, onError: (error: any) => void) => {
   return useMutation({
     mutationKey: "addEmployee",
     mutationFn: addEmployee,
@@ -16,7 +16,7 @@ export const useAddEmployeeMutation = (onSuccess: (data: any) => void, onError: 
   });
 };
 
-export const useUpdateEmployeeMutation = (onSuccess: (data: any) => void) => {
+export const UpdateEmployeeMutation = (onSuccess: (data: any) => void) => {
   return useMutation({
     mutationKey: "getEmployees",
     mutationFn: updateEmployee,
@@ -25,7 +25,7 @@ export const useUpdateEmployeeMutation = (onSuccess: (data: any) => void) => {
   });
 };
 
-export const useDeleteEmployeeMutation = (onSuccess: (data: any) => void) => {
+export const DeleteEmployeeMutation = (onSuccess: (data: any) => void) => {
   return useMutation({
     mutationKey: "getEmployees",
     mutationFn: deleteEmployee,
@@ -34,7 +34,7 @@ export const useDeleteEmployeeMutation = (onSuccess: (data: any) => void) => {
   });
 };
 
-export const useGetEmployeesQuery = (onSuccess: (data: any) => void) => {
+export const GetEmployeesQuery = (onSuccess: (data: any) => void) => {
   return useQuery({
     queryKey: ["getEmployees"],
     queryFn: getEmployees,
@@ -43,7 +43,7 @@ export const useGetEmployeesQuery = (onSuccess: (data: any) => void) => {
   });
 };
 
-export const useGetByIdQuery = (id: string, onSuccess: (data: any) => void) => {
+export const GetByIdQuery = (id: string, onSuccess: (data: any) => void) => {
   return useQuery({
     queryKey: ["getEmployees", id],
     queryFn: () => getEmployeeById(id),
