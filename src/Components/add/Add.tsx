@@ -5,7 +5,7 @@ import { Employee } from "../../Models/Employee";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { AddEmployeeMutation } from "../../queries/employeeQueries";
-import { showMessage } from "../../toast/messages";
+import { showError, showSuccess } from "../../toast/messages";
 import { AddProps } from "../../Models/AddProps";
 
 const Add = ({ toast, setAddVisibility }: AddProps) => {
@@ -16,7 +16,7 @@ const Add = ({ toast, setAddVisibility }: AddProps) => {
       if (data.status === 201) {
         const messageSummary = "Info";
         const message = "Employee added successfuly!"
-        showMessage(toast, "success", messageSummary, message);
+        showSuccess(toast, messageSummary, message);
       } else {
         throw new Error(
           `Unexpected server response. Server responded with status code ${data.status}`
@@ -36,7 +36,7 @@ const Add = ({ toast, setAddVisibility }: AddProps) => {
 
       const messageSummary = "Invalid data."
       const message = "All fields are required."
-      showMessage(toast, "error", messageSummary, message);
+      showError(toast, messageSummary, message);
       console.error(errorMessage);
     }
   );

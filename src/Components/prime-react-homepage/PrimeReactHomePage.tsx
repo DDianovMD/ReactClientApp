@@ -12,7 +12,7 @@ import {
   GetByIdQuery,
   DeleteEmployeeMutation,
 } from "../../queries/employeeQueries";
-import { showMessage } from "../../toast/messages";
+import { showError, showSuccess } from "../../toast/messages";
 import Add from "../add/Add";
 import Edit from "../edit/Edit";
 import { AxiosResponse } from "axios";
@@ -64,11 +64,11 @@ export function PrimeReactHomePage() {
       setEmployees(employees.filter((employee) => employee.id !== id));
       const messageSummary = "Employee deleted.";
       const message = "Successfully deleted employee!";
-      showMessage(toast, "success", messageSummary, message);
+      showSuccess(toast, messageSummary, message);
     } else {
       const messageSummary = "Error!";
       const message = "Unexpected error occured. Please try again later.";
-      showMessage(toast, "error", messageSummary, message);
+      showError(toast, messageSummary, message);
     }
     queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
   });

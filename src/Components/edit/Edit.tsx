@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import { Employee } from "../../Models/Employee";
 import { EditProps } from "../../Models/EditProps";
 import { UpdateEmployeeMutation } from "../../queries/employeeQueries";
-import { showMessage } from "../../toast/messages";
+import { showInfo, showWarning } from "../../toast/messages";
 import { useQueryClient } from "react-query";
 import { EmployeeContext } from "../../Models/EmployeeContext";
 
@@ -17,7 +17,7 @@ const Edit = ({ toast, setEditVisibility }: EditProps) => {
     if (data.status === 204) {
       const messageSummary = "Info";
       const message = "Employee edited successfuly!"
-      showMessage(toast, "warn", messageSummary, message);
+      showWarning(toast, messageSummary, message);
     }
 
     queryClient.invalidateQueries({ queryKey: ["getEmployees"] });
@@ -31,7 +31,7 @@ const Edit = ({ toast, setEditVisibility }: EditProps) => {
       } else {
         const messageSummary = "No changes were made.";
         const message = "In order to update information you should change field values.";
-        showMessage(toast, "info", messageSummary, message);
+        showInfo(toast, messageSummary, message);
       }
     },
   });
