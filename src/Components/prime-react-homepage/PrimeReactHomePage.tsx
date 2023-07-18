@@ -12,13 +12,12 @@ import {
   GetByIdQuery,
   DeleteEmployeeMutation,
 } from "../../queries/employeeQueries";
-import {
-  showMessage,
-} from "../../toast/messages";
+import { showMessage } from "../../toast/messages";
 import Add from "../add/Add";
 import Edit from "../edit/Edit";
 import { AxiosResponse } from "axios";
 import { EmployeeContext } from "../../Models/EmployeeContext";
+import EditedEmployee from "../edited-employee-info/EditedEmployee";
 
 export function PrimeReactHomePage() {
   const [addVisibility, setAddVisibility] = useState(false);
@@ -56,7 +55,7 @@ export function PrimeReactHomePage() {
     if (isEmployee(data.data)) {
       setEmployee(data.data);
     } else {
-      throw new Error("Server response didn't return object of type Employee");
+      console.error("Server response didn't return object of type Employee");
     }
   });
 
@@ -153,18 +152,29 @@ export function PrimeReactHomePage() {
         <Sidebar visible={addVisibility} onHide={() => setAddVisibility(false)}>
           <Add toast={toast} setAddVisibility={setAddVisibility} />
         </Sidebar>
-        {console.log(employee)}
         <Sidebar
           visible={editVisibility}
           onHide={() => {
             setEditVisibility(false);
           }}
         >
-          <EmployeeContext.Provider value={employee}>
-            <Edit toast={toast} setEditVisibility={setEditVisibility} />
-          </EmployeeContext.Provider>
+          {employeeQuery.isFetched ? (
+            <EmployeeContext.Provider value={employee}>
+              <Edit toast={toast} setEditVisibility={setEditVisibility} />
+            </EmployeeContext.Provider>
+          ) : (
+            <></>
+          )}
         </Sidebar>
         <Button icon="pi pi-plus" onClick={() => setAddVisibility(true)} />
+        <br />
+        {employee.id !== ''  ? (
+          <EmployeeContext.Provider value={employee}>
+            <EditedEmployee isEditing={editVisibility} />
+          </EmployeeContext.Provider>
+        ) : (
+          <></>
+        )}
       </>
     );
   }

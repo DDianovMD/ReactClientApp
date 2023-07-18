@@ -49,6 +49,6 @@ export const GetByIdQuery = (id: string, onSuccess: (data: any) => void) => {
     queryFn: () => getEmployeeById(id),
     onSuccess: onSuccess,
     onError: (error) => console.error(error),
-    enabled: false
+    enabled: true,
   });
 };
