@@ -10,7 +10,7 @@ import { useQueryClient } from "react-query";
 import { EmployeeContext } from "../../Models/EmployeeContext";
 import { EmployeeContextType } from "../../Models/EmployeeContextType";
 
-const Edit = ({ toast, setEditVisibility }: EditProps) => {
+const Edit = ({ toast, employeeEditHandler }: EditProps) => {
   const queryClient = useQueryClient();
   const employeeContext = useContext<EmployeeContextType | undefined>(EmployeeContext);
   const employee = employeeContext?.employee;
@@ -75,7 +75,7 @@ const Edit = ({ toast, setEditVisibility }: EditProps) => {
             type="submit"
             icon="pi pi-save"
             onClick={(event) => {
-              setEditVisibility(false);
+              employeeEditHandler(false);
             }}
           />
         </div>

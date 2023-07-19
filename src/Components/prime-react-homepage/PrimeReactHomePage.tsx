@@ -97,6 +97,15 @@ export function PrimeReactHomePage() {
     result = "phone" in object;
     return result;
   }
+  
+  // Event handlers
+  const employeeEditHandler = (data: boolean) => {
+    setEditVisibility(data);
+  }
+
+  const employeeAddHandler = (data: boolean) => {
+    setAddVisibility(data);
+  }
 
   if (employeesQuery.isLoading) {
     return (
@@ -154,7 +163,7 @@ export function PrimeReactHomePage() {
           ></Column>
         </DataTable>
         <Sidebar visible={addVisibility} onHide={() => setAddVisibility(false)}>
-          <Add toast={toast} setAddVisibility={setAddVisibility} />
+          <Add toast={toast} employeeAddHandler={employeeAddHandler} />
         </Sidebar>
         <Sidebar
           visible={editVisibility}
@@ -164,7 +173,7 @@ export function PrimeReactHomePage() {
         >
           {employeeQuery.isFetched ? (
             <EmployeeContext.Provider value={contextValue}>
-              <Edit toast={toast} setEditVisibility={setEditVisibility} />
+              <Edit toast={toast} employeeEditHandler={employeeEditHandler} />
             </EmployeeContext.Provider>
           ) : (
             <></>

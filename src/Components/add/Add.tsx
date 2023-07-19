@@ -8,7 +8,7 @@ import { AddEmployeeMutation } from "../../queries/employeeQueries";
 import { showError, showSuccess } from "../../toast/messages";
 import { AddProps } from "../../Models/AddProps";
 
-const Add = ({ toast, setAddVisibility }: AddProps) => {
+const Add = ({ toast, employeeAddHandler }: AddProps) => {
   const queryClient = useQueryClient();
 
   const addEmployee = AddEmployeeMutation(
@@ -80,7 +80,7 @@ const Add = ({ toast, setAddVisibility }: AddProps) => {
           <Button
             type="submit"
             icon="pi pi-check"
-            onClick={() => setAddVisibility(false)}
+            onClick={() => employeeAddHandler(false)}
           />
         </div>
       </form>
