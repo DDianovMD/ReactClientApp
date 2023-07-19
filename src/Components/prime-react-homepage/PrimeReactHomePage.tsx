@@ -24,6 +24,10 @@ export function PrimeReactHomePage() {
   const [editVisibility, setEditVisibility] = useState(false);
   const [id, setId] = useState<string>("");
   const [employee, setEmployee] = useState<Employee>(new Employee());
+  const contextValue = {
+    employee: employee,
+    setEmployee,
+  };
   const [employees, setEmployees] = useState<Employee[]>([]);
   const toast = useRef<Toast>(null);
   const queryClient = useQueryClient();
@@ -159,7 +163,7 @@ export function PrimeReactHomePage() {
           }}
         >
           {employeeQuery.isFetched ? (
-            <EmployeeContext.Provider value={employee}>
+            <EmployeeContext.Provider value={contextValue}>
               <Edit toast={toast} setEditVisibility={setEditVisibility} />
             </EmployeeContext.Provider>
           ) : (
@@ -168,13 +172,9 @@ export function PrimeReactHomePage() {
         </Sidebar>
         <Button icon="pi pi-plus" onClick={() => setAddVisibility(true)} />
         <br />
-        {employee.id !== ''  ? (
-          <EmployeeContext.Provider value={employee}>
-            <EditedEmployee isEditing={editVisibility} />
-          </EmployeeContext.Provider>
-        ) : (
-          <></>
-        )}
+        <EmployeeContext.Provider value={contextValue}>
+          <EditedEmployee isEditing={editVisibility} />
+        </EmployeeContext.Provider>
       </>
     );
   }

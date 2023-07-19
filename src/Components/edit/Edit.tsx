@@ -8,10 +8,12 @@ import { UpdateEmployeeMutation } from "../../queries/employeeQueries";
 import { showInfo, showWarning } from "../../toast/messages";
 import { useQueryClient } from "react-query";
 import { EmployeeContext } from "../../Models/EmployeeContext";
+import { EmployeeContextType } from "../../Models/EmployeeContextType";
 
 const Edit = ({ toast, setEditVisibility }: EditProps) => {
   const queryClient = useQueryClient();
-  const employee = useContext(EmployeeContext);
+  const employeeContext = useContext<EmployeeContextType | undefined>(EmployeeContext);
+  const employee = employeeContext?.employee;
 
   const updateMutation = UpdateEmployeeMutation((data) => {
     if (data.status === 204) {
@@ -24,10 +26,11 @@ const Edit = ({ toast, setEditVisibility }: EditProps) => {
   });
 
   const editFormik = useFormik<Employee>({
-    initialValues: employee,
+    initialValues: employee!,
     onSubmit: (employee: Employee) => {
       if (employee !== editFormik.initialValues) {
         updateMutation.mutate(employee);
+        employeeContext?.setEmployee(emp => new Employee());
       } else {
         const messageSummary = "No changes were made.";
         const message = "In order to update information you should change field values.";

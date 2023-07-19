@@ -1,4 +1,4 @@
 import { createContext } from 'react';
-import { Employee } from './Employee';
+import { EmployeeContextType } from './EmployeeContextType';
 
-export const EmployeeContext = createContext<Employee>(new Employee());
+export const EmployeeContext = createContext<EmployeeContextType | undefined>(undefined);
