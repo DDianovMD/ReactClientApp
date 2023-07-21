@@ -1,4 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, {
+  useState,
+  useRef,
+  useReducer,
+} from "react";
 import { useQueryClient } from "react-query";
 import { Skeleton } from "primereact/skeleton";
 import { DataTable, DataTableValue } from "primereact/datatable";
@@ -18,15 +22,16 @@ import Edit from "../edit/Edit";
 import { AxiosResponse } from "axios";
 import { EmployeeContext } from "../../Models/EmployeeContext";
 import EditedEmployee from "../edited-employee-info/EditedEmployee";
+import { employeeReducer } from "../../Models/EmployeeReducer";
 
 export function PrimeReactHomePage() {
   const [addVisibility, setAddVisibility] = useState(false);
   const [editVisibility, setEditVisibility] = useState(false);
   const [id, setId] = useState<string>("");
-  const [employee, setEmployee] = useState<Employee>(new Employee());
+  const [employee, dispatch] = useReducer(employeeReducer, new Employee());
   const contextValue = {
     employee: employee,
-    setEmployee,
+    dispatch,
   };
   const [employees, setEmployees] = useState<Employee[]>([]);
   const toast = useRef<Toast>(null);
@@ -57,7 +62,15 @@ export function PrimeReactHomePage() {
 
   const employeeQuery = GetByIdQuery(id, (data: AxiosResponse<Employee>) => {
     if (isEmployee(data.data)) {
-      setEmployee(data.data);
+      dispatch({
+        type: "getEmployee",
+        payload: {
+          id: data.data.id,
+          firstName: data.data.firstName,
+          lastName: data.data.lastName,
+          phone: data.data.phone,
+        },
+      });
     } else {
       console.error("Server response didn't return object of type Employee");
     }
@@ -97,15 +110,15 @@ export function PrimeReactHomePage() {
     result = "phone" in object;
     return result;
   }
-  
+
   // Event handlers
   const employeeEditHandler = (data: boolean) => {
     setEditVisibility(data);
-  }
+  };
 
   const employeeAddHandler = (data: boolean) => {
     setAddVisibility(data);
-  }
+  };
 
   if (employeesQuery.isLoading) {
     return (

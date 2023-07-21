@@ -30,7 +30,7 @@ const Edit = ({ toast, employeeEditHandler }: EditProps) => {
     onSubmit: (employee: Employee) => {
       if (employee !== editFormik.initialValues) {
         updateMutation.mutate(employee);
-        employeeContext?.setEmployee(emp => new Employee());
+        employeeContext?.dispatch({type: 'getEmployee', payload: new Employee()})
       } else {
         const messageSummary = "No changes were made.";
         const message = "In order to update information you should change field values.";
