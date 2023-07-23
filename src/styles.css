@@ -46,24 +46,6 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-.navbar-brand {
-  margin-left: 20px;
-}
-
-.edit-btn {
-  margin-right: 10px;
-}
-
-.form-container {
-  width: 200px;
-  align-self: center;
-}
-
-.form-container {
-  width: 200px;
-  align-self: center;
-}
-
 .visibility-hidden {
   visibility: hidden;
 }

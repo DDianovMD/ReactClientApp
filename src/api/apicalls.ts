@@ -15,8 +15,8 @@ export const addEmployee = (employee: Employee) => {
   return axios.post(URI, employee);
 };
 
-export const updateEmployee = (id: string, employee: Employee) => {
-  return axios.put(URI + `/${id}`, employee);
+export const updateEmployee = (employee: Employee) => {
+  return axios.put(URI + `/${employee.id}`, employee);
 };
 
 export const deleteEmployee = (id: string) => {
