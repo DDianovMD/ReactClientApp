@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Employee } from "../Models/Employee";
 
-const URI = "https://localhost:7189/api/employees";
+const URI = "http://localhost:9000/employees";
 
 export const getEmployees = () => {
   return axios.get(URI);
